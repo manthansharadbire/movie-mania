@@ -44,6 +44,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
+import MovieCard from './models/MovieCard.js';
 
 const app = express();
 app.use(express.json());
@@ -56,43 +57,45 @@ const connectDB = async () => {
     }
 };
 
-const MOVIE_MANIA = [];
 
-app.get("/health", (req, res) => {
+app.get("/health",(req, res) => {
     res.status(200).json({ message: 'Server is healthy!' });
 });
 
-app.get("/movies", (req, res) => {
+
+app.get("/movies", async(req, res) => { 
+
+    const newMovies = MovieCard.find();
     return res.status(200).json({
         success: true,
-        data: MOVIE_MANIA,
+        data: newMovies,
         message: "Movies fetched successfully",
     });
 });
 
-app.post("/movies", (req, res) => {
+app.post("/movies", async(req, res) => {
 
     const { title, year, genre, thumbnail } = req.body;
 
-    const newMovies = {
+    const newMovieCard = new MovieCard ({
         title,
         year,
         genre,
         thumbnail
-    };
+    });
 
-    MOVIE_MANIA.push(newMovies);
+    const savedMovieCard = await newMovieCard.save();
 
     return res.status(201).json({
         success: true,
-        dasta: MOVIE_MANIA,
+        dasta: savedMovieCard,
         message: "Movie card created successfully"
     });
 });
 
 
 
-const PORT = 5002;
+const PORT = process.env.PORT || 5002;
 
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
